@@ -1,0 +1,40 @@
+domain: quickissue.openeuler.org
+project: openeuler-quickissue-website           # service for what
+ingress-controller: nginx  #ingress-controller name
+cluster-issuer: letsencrypt-prod   #cert-manager: cluster issue name
+namespace: openeuler-quickissue-website
+container-port: 80         #service expose port
+replicas: 2
+image: swr.cn-north-4.myhuaweicloud.com/opensourceway/openeuler/openeuler-quickissue:b6e771c5636872c746ea21f84bd54cbd2fa9bc33
+env:
+  #- name: ENV1
+resources:
+  requests:
+    cpu: 500m        #2000m
+    memory: 500Mi    #2000Mi
+  limits:
+    cpu: 1000m        #2000m
+    memory: 1000Mi     #2000Mi
+configmap:
+secret:
+  # path:
+pvc:
+#  - mountpath: /var/log
+#    size: 10G
+healthy:
+  readinessProbe:
+    tcpSocket:
+      port: 8080
+    initialDelaySeconds: 10
+    failureThreshold: 3
+    successThreshold: 1
+    periodSeconds: 10
+    timeoutSeconds: 5
+  livenessProbe:
+    tcpSocket:
+      port: 8080
+    initialDelaySeconds: 20
+    periodSeconds: 20
+    successThreshold: 1
+    failureThreshold: 3
+    timeoutSeconds: 5
