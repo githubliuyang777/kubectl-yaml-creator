@@ -1,40 +1,155 @@
-domain: quickissue.openeuler.org
-project: openeuler-quickissue-website           # service for what
-ingress-controller: nginx  #ingress-controller name
-cluster-issuer: letsencrypt-prod   #cert-manager: cluster issue name
-namespace: openeuler-quickissue-website
-container-port: 80         #service expose port
-replicas: 2
-image: swr.cn-north-4.myhuaweicloud.com/opensourceway/openeuler/openeuler-quickissue:b6e771c5636872c746ea21f84bd54cbd2fa9bc33
-env:
-  #- name: ENV1
-resources:
-  requests:
-    cpu: 500m        #2000m
-    memory: 500Mi    #2000Mi
-  limits:
-    cpu: 1000m        #2000m
-    memory: 1000Mi     #2000Mi
-configmap:
-secret:
-  # path:
-pvc:
-#  - mountpath: /var/log
-#    size: 10G
-healthy:
-  readinessProbe:
-    tcpSocket:
-      port: 8080
-    initialDelaySeconds: 10
-    failureThreshold: 3
-    successThreshold: 1
-    periodSeconds: 10
-    timeoutSeconds: 5
-  livenessProbe:
-    tcpSocket:
-      port: 8080
-    initialDelaySeconds: 20
-    periodSeconds: 20
-    successThreshold: 1
-    failureThreshold: 3
-    timeoutSeconds: 5
+# this is yaml creater v1.0
+#domain: southbound.osinfra.cn
+#project: southbound           # service for what
+#ingress-controller: nginx  #ingress-controller name
+#cluster-issuer: letsencrypt-prod   #cert-manager: cluster issue name
+#namespace: southbound
+#container-port: 80         #service expose port
+#replicas: 1
+#image: swr.cn-north-4.myhuaweicloud.com/opensourceway/openeuler/southbound-service:a1bbc7a0b523a74cd7e75a2e9977f873c2786b5e
+#env:
+#- UserName
+#- Password
+#- URL
+#resources:
+#  requests:
+#    cpu: 1000m        #2000m
+#    memory: 2000Mi    #2000Mi
+#  limits:
+#    cpu: 2000m        #2000m
+#    memory: 4000Mi     #2000Mi
+#configmap:
+#secret:
+#  path: secrets/data/openeuler/southbound
+#pvc:
+##  - mountpath: /work/app-meeting-server/meetings/migrations
+##    size: 10G
+##  - mountpath: /work/app-meeting-server/share
+##    size: 10G
+#healthy:
+#  readinessProbe:
+#    tcpSocket:
+#      port: 8099
+#    initialDelaySeconds: 10
+#    failureThreshold: 3
+#    successThreshold: 1
+#    periodSeconds: 10
+#    timeoutSeconds: 5
+#  livenessProbe:
+#    tcpSocket:
+#      port: 8099
+#    initialDelaySeconds: 20
+#    periodSeconds: 20
+#    successThreshold: 1
+#    failureThreshold: 3
+#    timeoutSeconds: 5
+
+# this is yaml creater v2.0
+project: web
+containers:
+  - name: nginx
+    network: ingress # ingress loadbalance clusterip
+    domain: nginx.test.osinfra.cn     # optional, if network is ingress, you must fill in.
+    ingress-controller: nginx         # optional, if network is ingress, you must fill in.
+    cluster-issuer: letsencrypt-prod  # optional, if network is ingress, you must fill in.
+    path: /                           # optional, if network is ingress, you must fill in.
+    port: 8080                        # container expose port
+    replicas: 1                       #
+    image: mynginx:v1.0
+    env:
+      - MysqlHost
+      - MysqlUser
+      - MysqlPass
+    secret_path: secrets/data/infra-test/web
+    resources:
+      requests:
+        cpu: 1000m        #2000m
+        memory: 2000Mi    #2000Mi
+      limits:
+        cpu: 2000m        #2000m
+        memory: 4000Mi     #2000Mi
+    configmap:
+    secret:
+    pvc:
+      - mountpath: /var/log/nginx
+        size: 10G
+        accessModes: ReadWriteOnce
+        storageClassName: sas
+      - mountpath: /var/lib/nginx
+        size: 20G
+        accessModes: ReadWriteOnce
+        storageClassName: ssd
+      - mountpath: /etc/nginx
+        size: 30G
+        accessModes: ReadWriteOnce
+        storageClassName: nfs
+    healthy:
+      readinessProbe:
+        tcpSocket:
+          port: 8099
+        initialDelaySeconds: 10
+        failureThreshold: 3
+        successThreshold: 1
+        periodSeconds: 10
+        timeoutSeconds: 5
+      livenessProbe:
+        tcpSocket:
+          port: 8099
+        initialDelaySeconds: 20
+        periodSeconds: 20
+        successThreshold: 1
+        failureThreshold: 3
+        timeoutSeconds: 5
+  - name: server
+    network: ingress # ingress loadbalance clusterip
+    domain: nginx.test.osinfra.cn     # optional, if network is ingress, you must fill in.
+    ingress-controller: nginx         # optional, if network is ingress, you must fill in.
+    cluster-issuer: letsencrypt-prod  # optional, if network is ingress, you must fill in.
+    path: /api                        # optional, if network is ingress, you must fill in.
+    port: 8080                        # container expose port
+    replicas: 1                       #
+    image: myserver:v1.0
+    env:
+      - MysqlHost
+      - MysqlUser
+      - MysqlPass
+    secret_path: secrets/data/infra-test/web
+    resources:
+      requests:
+        cpu: 1000m        #2000m
+        memory: 2000Mi    #2000Mi
+      limits:
+        cpu: 2000m        #2000m
+        memory: 4000Mi     #2000Mi
+    configmap:
+    secret:
+    pvc:
+      - mountpath: /var/log/nginx
+        size: 10G
+        accessModes: ReadWriteOnce
+        storageClassName: sas
+      - mountpath: /var/lib/nginx
+        size: 20G
+        accessModes: ReadWriteOnce
+        storageClassName: ssd
+      - mountpath: /etc/nginx
+        size: 30G
+        accessModes: ReadWriteOnce
+        storageClassName: nfs
+    healthy:
+      readinessProbe:
+        tcpSocket:
+          port: 8099
+        initialDelaySeconds: 10
+        failureThreshold: 3
+        successThreshold: 1
+        periodSeconds: 10
+        timeoutSeconds: 5
+      livenessProbe:
+        tcpSocket:
+          port: 8099
+        initialDelaySeconds: 20
+        periodSeconds: 20
+        successThreshold: 1
+        failureThreshold: 3
+        timeoutSeconds: 5
