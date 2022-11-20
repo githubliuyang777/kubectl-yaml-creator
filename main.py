@@ -10,7 +10,6 @@ def kustomization_yaml_creater(resource, data):
         kustomization_bak = {}
         with open("./output/kustomization.yaml", "r") as sf:
             kustomization = yaml.load(sf, Loader=SafeLoader)
-            print(kustomization)
             kustomization_bak = kustomization
             kustomization_bak["resources"].append(resource + ".yaml")
             if (resource == "deployment"):
@@ -28,8 +27,6 @@ def kustomization_yaml_creater(resource, data):
             kustomization["resources"] = []
             kustomization["namespace"] = data["project"]
             kustomization["images"] = []
-            #kustomization["resources"].append(resource + ".yaml")
-
             with open("./output/kustomization.yaml", "w") as df:
                 df.write(yaml.dump(kustomization))
     print("finish creating kustomization.yaml")
@@ -128,8 +125,9 @@ def deployment_yaml_creater(data):
             str_addr = 0
             env_list = []
             for env in data["env"]:
-                env_dic = {"secretKeyRef": {"name": "", "key": ""}}
-                deployment["spec"]["template"]["spec"]["containers"][0]["env"][str_addr]["valueFrom"] = env_dic
+                env_dic = {"name": "", "valueFrom": {"secretKeyRef": {"name": "", "key": ""}}}
+                deployment["spec"]["template"]["spec"]["containers"][0]["env"][str_addr] = env_dic
+                deployment["spec"]["template"]["spec"]["containers"][0]["env"][str_addr]["name"] = env
                 key = deployment["spec"]["template"]["spec"]["containers"][0]["env"][str_addr]["name"].lower()
                 deployment["spec"]["template"]["spec"]["containers"][0]["env"][str_addr]["valueFrom"]["secretKeyRef"]["key"] = key
                 deployment["spec"]["template"]["spec"]["containers"][0]["env"][str_addr]["valueFrom"]["secretKeyRef"][
@@ -156,7 +154,7 @@ def deployment_yaml_creater(data):
                     mount_dic = {"name": "", "mountPath": ""}
                     deployment["spec"]["template"]["spec"]["containers"][0]["volumeMounts"].append(mount_dic)
                     print(deployment["spec"]["template"]["spec"]["containers"][0]["volumeMounts"])
-                    deployment["spec"]["template"]["spec"]["containers"][0]["volumeMounts"][args]["name"] = "container_mountpath" + str(args)
+                    deployment["spec"]["template"]["spec"]["containers"][0]["volumeMounts"][args]["name"] = "container-mountpath" + str(args)
                     deployment["spec"]["template"]["spec"]["containers"][0]["volumeMounts"][args]["mountPath"] = pvc_str["mountpath"]
                     volume_dic = {"name": "", "persistentVolumeClaim": {"claimName": ""}}
                     if ("volumes" in deployment["spec"]["template"]["spec"]):
